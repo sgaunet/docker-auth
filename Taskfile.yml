@@ -1,0 +1,31 @@
+# https://taskfile.dev
+version: '3'
+vars:
+  BINFILE: gocrypt
+
+includes:
+  dev: ./Taskfile_dev.yml
+
+tasks:
+
+  default:
+    desc: "List tasks"
+    cmds:
+      - task -a
+
+  binary:
+    desc: "Build binary"
+    cmds:
+      - CGO_ENABLED=0 go build -o docker-auth .
+    # silent: true
+
+  snapshot:
+    desc: "Create snapshot"
+    cmds:
+      - GITLAB_TOKEN="" goreleaser --clean --snapshot
+    
+  release:
+    desc: "Create release"
+    cmds:
+      - GITLAB_TOKEN="" goreleaser --clean
+    
