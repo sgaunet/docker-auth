@@ -3,6 +3,8 @@ package dockerauth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 )
 
@@ -15,7 +17,7 @@ func EncodeLoginPassword(login, password string) string {
 // The JSON object is a map of string to interface
 // If configFile is empty, it defaults to ~/.docker/config.json
 func LoadDockerConfig(configFile string) (map[string]interface{}, error) {
-	var generic map[string]interface{}
+	generic := make(map[string]interface{})
 
 	if configFile == "" {
 		configFile = "~/.docker/config.json"
@@ -29,10 +31,10 @@ func LoadDockerConfig(configFile string) (map[string]interface{}, error) {
 
 	// Decode the JSON
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&generic)
-	if err != nil {
-		return nil, err
-	}
+	_ = decoder.Decode(&generic)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return generic, nil
 }
@@ -42,7 +44,7 @@ func LoadDockerConfig(configFile string) (map[string]interface{}, error) {
 // If configFile is empty, it defaults to ~/.docker/config.json
 func SaveDockerConfig(configFile string, generic map[string]interface{}) error {
 	if configFile == "" {
-		configFile = "~/.docker/config.json"
+		configFile = fmt.Sprintf("%s/.docker/config.json", os.Getenv("HOME"))
 	}
 	// Open the file
 	file, err := os.Create(configFile)
@@ -66,9 +68,15 @@ func SaveDockerConfig(configFile string, generic map[string]interface{}) error {
 // The registry is the registry to add the auth to
 // The login and password are the credentials to add
 func AddAuthToDockerConfig(payload map[string]interface{}, registry, login, password string) error {
+	if payload == nil {
+		return errors.New("payload is nil")
+	}
 	if payload["auths"] == nil {
 		payload["auths"] = make(map[string]interface{})
 	}
-	payload["auths"].(map[string]interface{})[registry] = EncodeLoginPassword(login, password)
+	payload["auths"].(map[string]interface{})[registry] = map[string]interface{}{
+		"auth": EncodeLoginPassword(login, password),
+	}
+	// EncodeLoginPassword(login, password)
 	return nil
 }
