@@ -1,6 +1,33 @@
+[![GitHub release](https://img.shields.io/github/release/sgaunet/docker-auth.svg)](https://github.com/sgaunet/docker-auth/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sgaunet/docker-auth)](https://goreportcard.com/report/github.com/sgaunet/docker-auth)
+![GitHub Downloads](https://img.shields.io/github/downloads/sgaunet/docker-auth/total)
+[![License](https://img.shields.io/github/license/sgaunet/docker-auth.svg)](LICENSE)
+
 # docker-auth
 
 Tool to manage the authentifications in the docker configuration $HOME/.docker/config.json
+
+## Install
+
+Download binary from the releases page.
+
+A docker image is available. Use it to install docker-auth in your docker image. Example:
+
+```Dockerfile
+FROM sgaunet/docker-auth:v0.1.0 AS auth-image
+
+FROM alpine:3.20.3
+COPY --from=auth-image /usr/bin/docker-auth /usr/bin/docker-auth
+...
+````
+
+## Run
+
+```bash
+docker-auth add -l login -p password -r registry.example.com
+# authentication will be added to ~/.docker/config.json
+# use the argument -c if you want to initialize a different configuration file
+```
 
 ## Project Status
 
