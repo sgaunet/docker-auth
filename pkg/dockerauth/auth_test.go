@@ -105,7 +105,8 @@ func TestLoadDockerConfigFile(t *testing.T) {
 	t.Run("load empty file", func(t *testing.T) {
 		generic, err := dockerauth.LoadDockerConfig("testdata/emtpy.json")
 		assert.NotNil(t, err)
-		assert.Nil(t, generic)
+		assert.NotNil(t, generic)
+		assert.Equal(t, 0, len(generic))
 	})
 
 	t.Run("load non empty file", func(t *testing.T) {
@@ -118,6 +119,13 @@ func TestLoadDockerConfigFile(t *testing.T) {
 		generic, err := dockerauth.LoadDockerConfig("testdata/invalidjson.json")
 		assert.NotNil(t, err)
 		assert.Nil(t, generic)
+	})
+
+	t.Run("load a non existing file", func(t *testing.T) {
+		generic, err := dockerauth.LoadDockerConfig("testdata/nonexisting.json")
+		assert.NotNil(t, err)
+		assert.Equal(t, err, os.ErrNotExist)
+		assert.NotNil(t, generic)
 	})
 }
 
@@ -147,5 +155,20 @@ func TestSaveDockerConfigFile(t *testing.T) {
 		assert.Equal(t, 1, len(payload["auths"].(map[string]interface{})))
 		// cleanup
 		_ = os.Remove(testFile)
+	})
+
+	t.Run("check that directory is created", func(t *testing.T) {
+		testFile := "/tmp/createdir/validauth.json"
+		payload := make(map[string]interface{})
+		err := dockerauth.AddAuthToDockerConfig(payload, "https://index.docker.io/v1/", "login", "password")
+		assert.Nil(t, err)
+		err = dockerauth.SaveDockerConfig(testFile, payload)
+		assert.Nil(t, err)
+		payload, err = dockerauth.LoadDockerConfig(testFile)
+		assert.Nil(t, err)
+		assert.NotNil(t, payload)
+		assert.Equal(t, 1, len(payload["auths"].(map[string]interface{})))
+		// cleanup
+		_ = os.RemoveAll("/tmp/createdir")
 	})
 }
