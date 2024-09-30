@@ -33,11 +33,13 @@ var addCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		configFile := fmt.Sprintf("%s/.docker/config.json", os.Getenv("HOME"))
+		configFile := dockerauth.DefaultConfigFile
 		payload, err := dockerauth.LoadDockerConfig(configFile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error loading docker config: %v\n", err)
-			os.Exit(1)
+			if err != os.ErrNotExist {
+				fmt.Fprintf(os.Stderr, "error loading docker config: %v\n", err)
+				os.Exit(1)
+			}
 		}
 		err = dockerauth.AddAuthToDockerConfig(payload, registry, login, password)
 		if err != nil {
