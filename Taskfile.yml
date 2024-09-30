@@ -1,7 +1,5 @@
 # https://taskfile.dev
 version: '3'
-vars:
-  BINFILE: gocrypt
 
 includes:
   dev: ./Taskfile_dev.yml
@@ -16,8 +14,15 @@ tasks:
   binary:
     desc: "Build binary"
     cmds:
-      - CGO_ENABLED=0 go build -o docker-auth .
+      - CGO_ENABLED=0 GOOS=linux go build -o docker-auth .
     # silent: true
+
+  build:
+    desc: "Build"
+    deps:
+      - binary
+    cmds:
+      - docker build . -t sgaunet/docker-auth:latest 
 
   snapshot:
     desc: "Create snapshot"
