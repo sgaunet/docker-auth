@@ -1,0 +1,36 @@
+# https://taskfile.dev
+version: '3'
+
+includes:
+  dev: ./Taskfile_dev.yml
+
+tasks:
+
+  default:
+    desc: "List tasks"
+    cmds:
+      - task -a
+
+  binary:
+    desc: "Build binary"
+    cmds:
+      - CGO_ENABLED=0 GOOS=linux go build -o docker-auth .
+    # silent: true
+
+  build:
+    desc: "Build"
+    deps:
+      - binary
+    cmds:
+      - docker build . -t sgaunet/docker-auth:latest 
+
+  snapshot:
+    desc: "Create snapshot"
+    cmds:
+      - GITLAB_TOKEN="" goreleaser --clean --snapshot
+    
+  release:
+    desc: "Create release"
+    cmds:
+      - GITLAB_TOKEN="" goreleaser --clean
+    
