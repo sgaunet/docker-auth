@@ -4,9 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 )
+
+// DefaultConfigFile is the default path to the docker config file
+var DefaultConfigFile = "~/.docker/config.json"
 
 // EncodeLoginPassword encodes the login and password into a base64 string
 func EncodeLoginPassword(login, password string) string {
@@ -19,22 +21,17 @@ func EncodeLoginPassword(login, password string) string {
 func LoadDockerConfig(configFile string) (map[string]interface{}, error) {
 	generic := make(map[string]interface{})
 
-	if configFile == "" {
-		configFile = "~/.docker/config.json"
-	}
-	// Read the file
 	file, err := os.Open(configFile)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	// Decode the JSON
 	decoder := json.NewDecoder(file)
-	_ = decoder.Decode(&generic)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	err = decoder.Decode(&generic)
+	if err != nil {
+		return nil, err
+	}
 
 	return generic, nil
 }
@@ -43,10 +40,6 @@ func LoadDockerConfig(configFile string) (map[string]interface{}, error) {
 // The JSON object is a map of string to interface
 // If configFile is empty, it defaults to ~/.docker/config.json
 func SaveDockerConfig(configFile string, generic map[string]interface{}) error {
-	if configFile == "" {
-		configFile = fmt.Sprintf("%s/.docker/config.json", os.Getenv("HOME"))
-	}
-	// Open the file
 	file, err := os.Create(configFile)
 	if err != nil {
 		return err
@@ -77,6 +70,5 @@ func AddAuthToDockerConfig(payload map[string]interface{}, registry, login, pass
 	payload["auths"].(map[string]interface{})[registry] = map[string]interface{}{
 		"auth": EncodeLoginPassword(login, password),
 	}
-	// EncodeLoginPassword(login, password)
 	return nil
 }

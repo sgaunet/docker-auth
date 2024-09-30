@@ -3,6 +3,7 @@ package dockerauth_test
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -97,5 +98,54 @@ func TestAddAuthToDockerConfig(t *testing.T) {
 			t.Error("resultJSON not equal to expectedJSON")
 			fmt.Println(cmp.Diff(expectedJSON, resultJSON))
 		}
+	})
+}
+
+func TestLoadDockerConfigFile(t *testing.T) {
+	t.Run("load empty file", func(t *testing.T) {
+		generic, err := dockerauth.LoadDockerConfig("testdata/emtpy.json")
+		assert.NotNil(t, err)
+		assert.Nil(t, generic)
+	})
+
+	t.Run("load non empty file", func(t *testing.T) {
+		generic, err := dockerauth.LoadDockerConfig("testdata/emptyjson.json")
+		assert.Nil(t, err)
+		assert.NotNil(t, generic)
+	})
+
+	t.Run("load invalid json file", func(t *testing.T) {
+		generic, err := dockerauth.LoadDockerConfig("testdata/invalidjson.json")
+		assert.NotNil(t, err)
+		assert.Nil(t, generic)
+	})
+}
+
+func TestSaveDockerConfigFile(t *testing.T) {
+	t.Run("save empty json", func(t *testing.T) {
+		testFile := "/tmp/emptyjson.json"
+		err := dockerauth.SaveDockerConfig(testFile, make(map[string]interface{}))
+		assert.Nil(t, err)
+		payload, err := dockerauth.LoadDockerConfig(testFile)
+		assert.Nil(t, err)
+		assert.NotNil(t, payload)
+		assert.Equal(t, 0, len(payload))
+		// cleanup
+		_ = os.Remove(testFile)
+	})
+
+	t.Run("save valid auth", func(t *testing.T) {
+		testFile := "/tmp/validauth.json"
+		payload := make(map[string]interface{})
+		err := dockerauth.AddAuthToDockerConfig(payload, "https://index.docker.io/v1/", "login", "password")
+		assert.Nil(t, err)
+		err = dockerauth.SaveDockerConfig(testFile, payload)
+		assert.Nil(t, err)
+		payload, err = dockerauth.LoadDockerConfig(testFile)
+		assert.Nil(t, err)
+		assert.NotNil(t, payload)
+		assert.Equal(t, 1, len(payload["auths"].(map[string]interface{})))
+		// cleanup
+		_ = os.Remove(testFile)
 	})
 }
