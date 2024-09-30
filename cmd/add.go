@@ -33,7 +33,6 @@ var addCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		configFile := dockerauth.DefaultConfigFile
 		payload, err := dockerauth.LoadDockerConfig(configFile)
 		if err != nil {
 			if err != os.ErrNotExist {

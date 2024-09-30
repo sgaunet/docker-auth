@@ -3,10 +3,11 @@ package cmd
 import (
 	"os"
 
+	"github.com/sgaunet/docker-auth/pkg/dockerauth"
 	"github.com/spf13/cobra"
 )
 
-var registry, login, password string
+var registry, login, password, configFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -27,8 +28,9 @@ func Execute() {
 
 func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	addCmd.Flags().StringVar(&registry, "r", "", "registry")
-	addCmd.Flags().StringVar(&login, "l", "", "login of the registry")
-	addCmd.Flags().StringVar(&password, "p", "", "password of the registry")
+	addCmd.Flags().StringVarP(&registry, "registry", "r", "", "registry")
+	addCmd.Flags().StringVarP(&login, "login", "l", "", "login of the registry")
+	addCmd.Flags().StringVarP(&password, "password", "p", "", "password of the registry")
+	addCmd.Flags().StringVarP(&configFile, "config", "c", dockerauth.DefaultConfigFile, "config file")
 	rootCmd.AddCommand(addCmd)
 }
