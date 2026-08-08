@@ -1,5 +1,4 @@
 [![GitHub release](https://img.shields.io/github/release/sgaunet/docker-auth.svg)](https://github.com/sgaunet/docker-auth/releases/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/sgaunet/docker-auth)](https://goreportcard.com/report/github.com/sgaunet/docker-auth)
 ![GitHub Downloads](https://img.shields.io/github/downloads/sgaunet/docker-auth/total)
 [![License](https://img.shields.io/github/license/sgaunet/docker-auth.svg)](LICENSE)
 
